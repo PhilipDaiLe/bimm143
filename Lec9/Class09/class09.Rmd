@@ -1,0 +1,191 @@
+---
+title: "Class09"
+author: "Philip Dai Le"
+date: "10/29/2019"
+output: html_document
+---
+
+**Lecture 9 - 10/29/19**
+
+PCA- principal component analysis - is to streamline data as new low
+  dimensional axis and apply them to the axises
+  
+-to reduce dimensionality and number of data comparisons
+
+#Used Functions:
+-kmean()
+-Hclust(dist())
+-prcomp (x, scale="TRUE"); 
+    -"Scale" means the type of measurement; Ex: mpg, engine cyclinders,HP
+    -Scale = FALSE: focuses on largest measured value type
+    -Scale = TRUE: allows equal distribuition on al measured values
+    -IRL: 
+
+#reading in downloaded files for this week
+```{r}
+#sample file with a bunch of mean values
+#read.csv("new_samples.csv") 
+
+#Data file with a variety of measurements
+wisc.df<-fna.data<-read.csv("WisconsinCancer.csv", sep=",")
+wisc.df
+wisc.data<-as.matrix(wisc.df[3:32])
+row.names(wisc.data)<-wisc.df$id
+diagnosis <-wisc.df$diagnosis
+```
+Note that the 'id' and 'diagnosis' columns will not be used for most of the following steps
+
+-we have 'r nrow(wisc.df) to determine number of patients
+-table(wisc.df$diagnosis) determines the number of benighn or malignant patients
+```{r}
+#determine how many patients are there by observed the number of rows
+nrow(wisc.df)
+wisc.df
+table(wisc.df$diagnosis) #function to determine the number of a value of a column; '$' picks out the value specificed following the symbol
+```
+
+Following analysis of cancer data, zip code was accidently factored in and we determined that zip codes from the richer areas had better diagnosis than patients from poorer areas.
+
+Always look at what data is being considered to have an appropriate data set. 'X' column is terrible.
+
+```{r}
+#convert features of data
+wisc.data<-as.matrix(wisc.df[,3:32])
+#set row names of wisc data
+row.names(wisc.data)<-wisc.df$id
+head(wisc.data)
+
+diagnosis <-wisc.df$diagnosis
+```
+
+#Exploratory data analsis
+```{r}
+#How many observations in the dataset? 569 patients
+dim(wisc.data)
+
+#Q2 How many observations have a malignant diagnosis? 212
+table(wisc.df$diagnosis)
+
+#Q3 How many variables/features in the data are suffixed with _mean?
+colnames(wisc.df) # inefficient, we have to count the names
+grep(pattern = "_mean", colnames(wisc.df), value = TRUE) #grep() finds a string that the other strings have; returned the position numbers of values containing pattern "_mean"; value = TRUE displays name
+
+```
+#Use 'length()' to count how many matches
+```{r}
+length(grep(pattern = "_mean", colnames(wisc.df), value = TRUE) ) # displays how many vvariables/features that has the desired pattern "_mean"
+```
+
+##Principal Component Analysis
+```{r}
+#Values of the data very different, thus requires use of 'scale=TRUE' when using PCA
+#checks col means
+round (colMeans(wisc.data),3)
+
+#checks col standard deviation; round tries to scale the values with 3 decimal places
+round(apply(wisc.data,2,sd),3)
+
+#Applying PCA to wisc.data with prcomp()
+wisc.pr<-prcomp(wisc.data,scale=TRUE)
+
+#summary of wisc.pr PCA
+summary(wisc.pr)
+
+plot(wisc.pr) #displays skree plot to determine which PCA is best; PCA 1 and PCA 2 are key
+
+#Plot PCA 1 vs PCA 2
+plot(wisc.pr$x[,1], wisc.pr$x[,2], col=diagnosis, pch=16)
+ #xlab=paste0("PC1 (", pca.var.per[1], "%)"),
+ #ylab=paste0("PC2 (", pca.var.per[2], "%)"))
+# confused on col setting, when to use "" or just the variable name like diagnosis
+
+#Interpretting deviation in PCA
+#Q4From your results, what proportion of the original variance is captured by the first principal components (PC1)? Proportion of Variance = 44%
+
+#Q5. How many principal components (PCs) are required to describe at least 70% of the original variance in the data?
+#x<-summary(wisc.pr)
+summary(wisc.pr)$importance[3,] >0.7
+x$importance[3,]>0.7
+
+#Q6. How many principal components (PCs) are required to describe at least 90% of the original variance in the data?
+x<-summary(wisc.pr)
+x$importance[3,] >0.9
+
+
+?which()
+#Q7 
+biplot(wisc.pr)
+plot(wisc.pr$x, col= diagnosis, xlab = "PC1", ylab = "PC2")
+
+plot(wisc.pr$x[,3], col= diagnosis, xlab = "PC1", ylab = "PC3")
+```
+```{r}
+x<-summary(wisc.pr)
+which (x$importance["Culmulative Proportion",] >0.8[1])
+```
+
+#PCA plot showing clusters of cell types
+Done by compressing a variety of data and dimensions and creates a representative value "PC". Allows the program to focus on relative differences in variance
+
+**Section 3 Hierarchical clustering**
+Scaling wisc.data
+```{r}
+data.scaled<-scale(wisc.data)
+```
+
+Calculating euclidean distance of data.scale
+```{r}
+data.dist<- dist(data.scaled)
+```
+
+Creating a hierarchical clustering model
+```{r}
+wisc.hclust<-hclust(data.dist, members= NULL)
+```
+
+Plotting a hierarchical clustering
+```{r}
+plot(wisc.hclust)
+abline(h=19, col="red", lty=2)
+```
+
+```{r}
+wisc.hclust.clusters <- cutree(wisc.hclust, k=4)
+?cutree()
+table(wisc.hclust.clusters, diagnosis)
+```
+Q12. Can you find a better cluster vs diagnoses match with by cutting into a different number of clusters between 2 and 10?
+Cluster cut at h = 17 or K= 8
+
+**Section 5: Combining Methods**
+Function specificity:
+*Hclust(dist(wisc.pr$x,[1:3])); specifies the amount of PC components in []. Hclust always needs distance matrix
+
+```{r}
+wisc.pr.hclust<-hclust(dist(wisc.pr$x[,1:3]))
+plot(wisc.pr.hclust)
+grps<-cutree(wisc.pr.hclust, k=2)
+table(grps)
+table(grps,diagnosis)
+plot(wisc.pr$x[,1:2], col=grps)
+table(wisc.hclust.clusters,diagnosis)
+```
+
+**Section 7 Prediction**
+
+url<-"httpe://tinyyurl.com/new-samples-CSV"
+```{r}
+#url<-"httpe://tinyyurl.com/new-samples-CSV"; could not pull file from URL due to connection error
+new<-read.csv("new_samples.csv")
+npc<-predict(wisc.pr,newdata=new)
+npc
+
+#plotting clusters in regards to entered file
+plot(wisc.pr$x[,1:2], col=diagnosis)
+#points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+text (npc[,1],npc[,2], col="white")
+table(wisc.hclust.clusters,diagnosis)
+#black is benign and red is malignant
+```
+
