@@ -2,7 +2,7 @@
 title: "Class15"
 author: "Philip Dai Le"
 date: "11/14/2019"
-output: html_document
+output: github_document
 ---
 ##Lecture 15: Pathway Analysis
 
