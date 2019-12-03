@@ -1,5 +1,12 @@
-#Class 5 - Data visualization
+#' ---
+#' title: "class05: Data exploration and visualization in R"
+#' author: "Philip Le"  
+#' date: "Oct 17 2019"  
+#' output: github_document
+#' ---
 
+#Class 5 - Data visualization
+#'output:github_document
 #Section 1 X
 x <- rnorm(1000)
 mean(x)
