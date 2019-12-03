@@ -1,0 +1,212 @@
+---
+title: "Class15"
+author: "Philip Dai Le"
+date: "11/14/2019"
+output: html_document
+---
+##Lecture 15: Pathway Analysis
+
+**Section 1. Differential Expression Analysis**
+
+Loading in data package and initializing external files
+```{r}
+library(DESeq2) #loading data files
+metaFile <-"GSE37704_metadata.csv" #assigning data files to a variable for easy use
+countFile <-"GSE37704_featurecounts.csv"
+```
+
+Importing both metadata and countdata
+```{r}
+colData = read.csv(metaFile, row.names=1)
+head(colData)
+
+countData = read.csv(countFile, row.names = 1)
+head(countData)
+
+#notice how the data output are in different formats, different number of columns. Need to adjust data for proper merging
+```
+
+Adjusting countData and colData for merging. Used "-1" to remove the odd first $length col.
+```{r}
+countData <-as.matrix(countData[,-1])
+head(countData)
+```
+
+Need to check if the data files line up in countData and metaData.  Focus on the id values of the colData metadata file. Use of the "all()" function allows all entry checking in a vector to see if they're TRUE
+```{r}
+colnames(countData)
+colnames(colData)
+
+#How to check for all entries? Check colnames of countData and rownames of colData
+all(colnames(countData) == rownames(colData))
+
+#results all returning TRUE = good
+
+```
+
+```{r}
+#test for the check
+all(c(T,F,T))
+```
+
+countData needs to be filtered out for the zero entries in all the experiments.
+```{r}
+#rowSums(countData) >0, loads only data greater than 0. !=0 denotes the values that are not 0 thus TRUE or FALSE
+countData = countData [rowSums(countData)>0,]
+head(countData)
+```
+
+Setting up DESeq2 to run DESeq pipeline on our data
+```{r}
+library(DESeq2)
+dds = DESeqDataSetFromMatrix(countData = countData, colData = colData, design=~condition)
+
+dds = DESeq(dds)
+
+dds
+
+#res = results(dds)
+res = results(dds, contrast=c("condition", "hoxa1_kd", "control_sirna"))
+summary(res)
+```
+
+Plotting volcano plot
+```{r}
+plot (res$log2FoldChange, -log(res$padj))
+```
+
+Adjusting and coloring the volcano plot
+```{r}
+#Making a color vector for all genes
+mycols <- rep("gray", nrow(res))
+
+#Coloring red for hte genes with absolute foldchange greater than 2
+mycols [abs(res$log2FoldChange)>2]<- "red"
+
+#Coloring blue with adjusted p-value less than 0.01 and absolute fold change greater than 2
+
+inds<- ("P-value"<0.01) & (abs(res$log2FoldChange) > 2)
+mycols [inds] <- "blue"
+
+plot (res$log2FoldChange, -log(res$padj), col = mycols, xlab = "Log2(FoldChange)", ylab="-Log(P-value)")
+```
+
+```{r eval= FALSE}
+#BiocManager :: install ("AnnotationDbi")
+#BiocManager :: install("org.his.eg.db")
+
+```
+
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+```{r}
+columns(org.Hs.eg.db)
+
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(countData), 
+                    keytype="ENSEMBL",
+                    column="SYMBOL",
+                    multiVals="first")
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=row.names(countData),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+#res$name =   mapIds(org.Hs.eg.db, keys=row.names(countData),keytype="ENSEMBL",column="NAMEID",multiVals="first")
+
+head(res, 10)
+
+```
+
+##Section 2. Pathway Analysis
+Kegg pathways analysis using pathview. First, Installed bioconductor package: pawthview, gage, and gageData. The loaded in pathview.
+```{r}
+library (pathview)
+```
+
+
+Loading in data packages and outputting data
+```{r}
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+
+
+Running **gage** pathway analysis.
+```{r}
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+```{r}
+attributes(keggres)
+```
+
+```{r}
+head(keggres$less)
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+
+Changing the input arguments to pathview()
+```{r}
+# A different PDF based output of the same data
+pathview(gene.data=foldchanges, pathway.id="hsa04110", kegg.native=FALSE)
+```
+
+
+```{r}
+## Focus on top 5 upregulated pathways here for demo purposes only
+keggrespathways <- rownames(keggres$greater)[1:5]
+
+# Extract the 8 character long IDs part of each string
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
+```
+
+
+
+##Section 3 Gene Ontology (G0)
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+lapply(gobpres, head)
+```
+
+
+
