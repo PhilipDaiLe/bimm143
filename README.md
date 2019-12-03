@@ -6,8 +6,8 @@ This is my class work for Intro to Bioinformatics (Bimm 143) at UCSD (https://ph
 
 ## Content work
 
--Class05: [Data exploration and visualization in R](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec5Classwork/Class5R.md)
+- Class05: [Data exploration and visualization in R](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec5Classwork/Class5R.md)
 
--Class09: [Unsupervised learning mini-project](https://github.com/PhilipDaiLe/bimm143/tree/master/Lec9/Class09)
+- Class09: [Unsupervised learning mini-project](https://github.com/PhilipDaiLe/bimm143/tree/master/Lec9/Class09)
 
-testing again 11:20am
+- testing again 11:20am
