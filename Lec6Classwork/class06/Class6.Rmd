@@ -1,0 +1,154 @@
+---
+title: "Class06 R functions"
+author: "Philip Dai Le"
+date: "10/17/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This is my work flow for class 06 in **BIMM 143**: "Intro to bioinformatics".
+
+
+```{r}
+#this is to demo a code chunk. This is a code chunk in R
+plot(1:10)
+```
+
+##Practice reading files (again...)
+read.table() functions differ in parameters:
+read.delim; uses sep="\t"
+read.csv; uses sep=","
+read.csv2; uses sep=";"
+read.table; uses sep=" "
+
+```{r}
+read.table("test1.txt", sep=",", header=TRUE)
+read.table("test2.txt")
+read.table("test3.txt", sep="\t", header = FALSE)
+read.csv 
+read.table("https://bioboot.github.io/bimm143_S19/class-material/test2.txt", sep="$",header= TRUE)
+```
+
+```{r}
+add <- function(x, y=1) {
+ # Sum the input x and y
+ x + y
+}
+```
+
+Use ctrl+alt+I to insert code chunk
+```{r}
+add(1)
+add(5,5) 
+#overides default y value
+#add(5,"barry"), add(5,5,5) 
+#can't use a third value for Z cause not initiated and can't use non-numerical value
+```
+
+"Our wee function is vectorized :-)" - Barry Grant
+```{r}
+add(x=1, y=4)
+add(1, 4)
+add(1)
+add( c(1, 2, 3) )
+add( c(1, 2, 3), 4 )
+#add(1, 2, 2), error due to third value not initialized 
+#add(x=1, y=“b”), error due to y="b"
+```
+
+
+What does this code do?
+df$a <- (df$a - min(df$a)) / (max(df$a) - min(df$a))
+df$b <- (df$b - min(df$a)) / (max(df$b) - min(df$b))
+df$c <- (df$c - min(df$c)) / (max(df$c) - min(df$c))
+df$d <- (df$d - min(df$d)) / (max(df$a) - min(df$d)) 
+
+Silent killers in code, trying to use "a" for df$b and df$d
+
+Here the the intent is far more clear:
+df$a <- rescale (df$a)
+Purpose of code is clearer, reduce mistakes from copy/paste, updating code is easier, and reduce duplication and facilitate re-use
+
+
+Start with code snippet to simplify and reduce calculatino duplication
+Ex:x <- (x - min(x)) / (max(x) - min(x))
+```{r}
+rescale <- function(x) {
+ rng <-range(x)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+
+
+```
+
+```{r}
+rescale(1:10)
+?range
+range (1:10)
+range (1:20)
+y<-range(c(5,1,2,5,20))
+y[1]
+y[2]
+c("a","b")
+
+```
+
+Test some
+```{r}
+rescale(c(1,2,NA,3,10))
+```
+
+```{r}
+x<-c(1,2,NA,3,10)
+rng<-range(x, na.rm = TRUE)
+rng
+```
+
+```{r}
+rescale2<- function(x) {
+  rng<-range(x, na.rm = TRUE)
+  (x-rng[1])/(rng[2]-rng[1])
+}
+```
+
+```{r}
+rescale2 (c(1,2,NA,3,10))
+```
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+ rng <-range(x, na.rm=na.rm)
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ return(answer)
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+ }
+ print("I can see it in ...")
+ return(answer)
+}
+
+```
+
+```{r}
+rescale3(1:10, plot = FALSE)
+```
+
+```{r}
+rescale3(1:10, plot=TRUE)
+```
+
+Additional Info regarding header sizes
+#This is H1
+Creates small header
+
+## This is H2
+Creates large header
+
+### This is H3
+Creates medium header

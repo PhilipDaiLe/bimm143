@@ -1,0 +1,56 @@
+---
+title: "Q6Hw"
+author: "Philip Dai Le"
+date: "10/23/2019"
+output: html_document
+---
+**Original Hands-on code:**
+# Can you improve this analysis code?
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+
+**My thinking:**
+Analysis code has redundances of key code needed for proper functionality and varying inputted file name. The created function retained these key code lines in the function body. The main changing code from the original code is the file name, so the function's argument is "filename".
+
+```{r}
+#hw : Making a function to streamline analysis code from Lec 6 hands-on Q6.
+#Known input files: 4AKE, 1AKE, 1E4Y
+#Documentation:
+
+#Inputs for the function is the filename of the amino acid(AA). Seen in function argument and read.pdb argument as "filename"
+
+#Purpose of the function is to output a plot of residue vs Bfactor for the AA. 
+
+#The function is used by calling it(hw("filename")) with an appropiate filename in its parantheses. Multiple plots of different or same amino acids can be outputted by repeatedly calling the function on sequential lines or on the same line separated by "&"
+
+#Error output of the function should be:"Error in read.pdb(filename) : No input PDB file found: check filename"
+
+
+
+hw<-function(filename){
+  library(bio3d)
+s1 <- read.pdb(filename) 
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+}
+
+#examples of calling the function
+hw("1AKE")
+hw("4AKE")
+hw("1E4Y")
+
+hw ("1AKE") & hw("4AKE") & hw("1E4Y")
+```
+
