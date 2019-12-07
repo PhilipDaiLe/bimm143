@@ -1,0 +1,223 @@
+---
+title: "Class7"
+author: "Philip Dai Le"
+date: "10/22/2019"
+output: github_document
+---
+
+Lecture 7 - 10/22/19
+#Key commads:
+Ctrl+Alt+i = new code chunk
+Alt+Enter = run code chunk
+
+How to write normal functions
+```{r}
+rescale <- function(x, na.rm=TRUE, plot=FALSE, ...) {
+ rng <-range(x, na.rm=na.rm)
+
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ if(plot) {
+ plot(answer, ...)
+ }
+ return(answer)
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R functions revisted 
+
+Source my function from last day
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+```{r}
+#rescale(1:10)
+rescale(c(1,10,5,NA,6), na.rm=TRUE)
+```
+
+Warning and Stop functions
+-To control unexpected occurences/scenarios in a function
+-Warning() gives a warning
+-Stop() stops/breaks the function
+```{r}
+rescale2 <- function(x, na.rm=TRUE, plot=FALSE, ...) {
+ if( !is.numeric(x) ) {
+ stop("Input x should be numeric", call.=FALSE)
+ }
+ rng <-range(x, na.rm=na.rm)
+
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ if(plot) {
+ plot(answer, ...)
+ }
+ return(answer)
+}
+```
+
+
+Error message useful to understand desired input and source of error
+```{r}
+#rescale2(1:10, "barry")
+```
+
+##A new function called both NA
+Write a function to find where there are NA in two input vetors.
+Firstly, make simple input where answer is known
+```{r}
+# Lets define an example x and y
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+
+```
+
+Looked online and found the **is.na() function**
+```{r}
+is.na(x)
+
+```
+
+
+```{r}
+#tells which elements are true in regards to the function is.na()
+which (is.na(x))
+which (is.na(y))
+```
+
+The AND function requires two input TRUE to give. Taking the **sum()** of TRUE FALSE vectore will tell me how many TRUE elements I have. This is my working snippet of code.
+```{r}
+#practice with &
+is.na(x) & is.na(y)
+sum(is.na(x) & is.na(y))
+```
+
+```{r}
+#TRUE treated as 1 and FALSE treated as 0
+sum(c(TRUE,TRUE,FALSE,TRUE))
+```
+
+Now turning the working snippet into a function
+```{r}
+#x <- c( 1, 2, NA, 3, NA)
+#y <- c(NA, 3, NA, 3, 4)
+
+both_na<-function(x,y){
+sum(is.na(x) & is.na(y))
+}
+both_na(x,y)
+```
+
+Testing various outputs in a function
+```{r}
+#eejit proofing
+x <- c(NA, NA, NA)
+x2<- c(NA, NA, NA, NA)
+y1 <- c( 1, NA, NA)
+y2 <- c( 1, NA, NA, NA)
+both_na(x, y1)
+both_na(x2, y2)
+#longer object length is not a multiple of shorter object [1] 3. Error due to recycling in vectors. X is not as long as Y so it reuses the first variable of X for the 4th variable of Y
+```
+```{r}
+x<- c(1, NA, NA)
+y3<- c (1, NA, NA, NA, NA, NA, NA)
+both_na (x,y3)
+#Useful for understanding plots. The output [1] 4 is the ouput of x<-c(1, NA, NA, 1, NA, NA, 1) when using x<-c(1, NA, NA)
+```
+
+
+Revisiting recycling in vector
+```{r}
+#Notice how the color variables are recycled continuously after green is used.
+plot(1:10, col =c( "red", "blue", "green" ))
+```
+```{r}
+#use of function length()
+length(x)
+length( y3)
+length(x) == length (y3)
+```
+
+```{r}
+both_na2<-function(x,y){
+        if(length(x)!=length(y)) {
+                stop("STOP, input lengths are not equal")
+        }
+sum(is.na(x) & is.na(y))
+
+}
+
+```
+
+Writing a function practice on student grade
+```{r}
+# student 1, out of 800 this totals out to 790
+Stu1<- c(100, 100, 100, 100, 100, 100, 100, 90)
+# student 2, out of 800 this totals out to 637 if NA = 0
+Stu2<- c(100, NA, 90, 90, 90, 90, 97, 80)
+#if statement has to be first, stop() will stop code at missing input
+grade<-function(x){
+        if(any(is.na(x))){
+                warning("Student is missing homework")
+        }
+
+        finalgrade<- (sum(x, na.rm=TRUE)/800)*100
+        print("Your final grade percent is")
+        return(finalgrade)
+}
+grade(Stu1)
+grade(Stu2)
+```
+
+Dr. Barry Grant's code solution
+```{r}
+# student 1, out of 800 this totals out to 790
+s1<- c(100, 100, 100, 100, 100, 100, 100, 90)
+# student 2, out of 800 this totals out to 637 if NA = 0
+s2<- c(100, NA, 90, 90, 90, 90, 97, 80)
+
+#basic function body: s2[-which.min(s2)]
+#mean (s2[-which.min(s2)],na.rm=TRUE)
+GrantGrade<-function(x){
+        NiceGrade<-mean(x[-which.min(x)], na.rm=TRUE)
+        #print("Your adjusted grade percent is")
+        return(NiceGrade)
+}
+GrantGrade(s1)
+GrantGrade(s2)
+#"-" cause to print out everything but minimal 
+```
+
+We have our working code now turn it into a first function
+```{r}
+#GrantGrade<-function(x){
+ #       if (any(is.na(x)) ) {
+  #              warning ("Student is missing a homework")
+   #     }
+    #    NiceGrade<-mean(x[-which.min(x)], na.rm=TRUE)
+        #print("Your adjusted grade percent is")
+     #   return(NiceGrade)
+#}
+#GrantGrade(s1)
+#GrantGrade(s2)
+
+#s3<- c(100, NA, NA, NA, NA)
+#grade2<
+#grade2(s3)
+```
+
+URL example for function
+```{r}
+url <-"https://tinyurl.com/gradeinput"
+hw<- read.csv(url, row.names=1)
+apply(hw,1, GrantGrade)
+```
+
+```{r}
+#install.packages("msa")
+library (msa)
+```
+
