@@ -36,6 +36,6 @@ This is my class work for Intro to Bioinformatics (Bimm 143) at UCSD (https://ph
 
 - Class17: [Biological network analsis](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec17/Class17/Class17.Rmd)
 
-- Class18: [Cancer genomics](
+- Class18: [Cancer genomics](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec18/Lec18/Class18.Rmd)
 
 
