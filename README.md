@@ -22,7 +22,7 @@ This is my class work for Intro to Bioinformatics (Bimm 143) at UCSD (https://ph
 
 - Class10: [Find a gene assignment (part 1) & github]
 
-- Class11: [Structural Bioinformatics (part 1)](
+- Class11: [Structural Bioinformatics (part 1)](https://github.com/PhilipDaiLe/bimm143/blob/master/lec11.md)
 
 - Class12: [Bioinformatics in drug discovery and design](https://github.com/PhilipDaiLe/bimm143/blob/master/lec12/class12files/class12.md)
 
