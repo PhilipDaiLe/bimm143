@@ -1,0 +1,55 @@
+---
+title: "Class12Git"
+output: github_document
+---
+##Lecture 12 
+
+##Loading bio3d libary and reading in 1hsg file then assigning it to hiv for convenience.
+```{r}
+library(bio3d)
+file.name<- get.pdb("1hsg.pdb")
+hiv<-read.pdb(file.name)
+
+hiv
+```
+
+> **Q1**: What is the name of the two non protein resid values in this structure? What does resid
+correspond to and how would you get a listing of all reside values in this structure? 
+
+The two non-protein resd values are: HOH (127) and MK1 (1) 
+
+The residue corresponds to the water being a stabilizing factor for the protein and MK1 would be the drug ligand in 1hsg.
+
+
+##Trimming the 1hsg pdb file to create protein and ligand only objects
+```{r}
+prot<-trim.pdb(hiv, "protein")
+lig<-trim.pdb(hiv, "ligand")
+
+prot
+lig
+```
+
+##Alternative manner for trimming
+```{r}
+protein<-atom.select(hiv, "protein", value = TRUE)
+write.pdb(protein,file="1hsg_protein.pdb")
+protein
+
+ligand<-atom.select(hiv,"ligand",value=TRUE)
+write.pdb(ligand,file="1hsg_ligand.pdb")
+```
+
+
+Reading in ADT file for hsg
+```{r}
+read.all("1hsg_protein.pdbqt")
+```
+
+##2.3 Inspecting your docking results 
+```{r}
+library(bio3d)
+res <-read.pdb("all.pdbqt", multi=TRUE)
+write.pdb(res,"results.pdb")
+```
+

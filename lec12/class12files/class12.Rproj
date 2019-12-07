@@ -1,0 +1,14 @@
+---
+title: "class13"
+author: "Philip Dai Le"
+date: "11/7/2019"
+output: html_document
+---
+
+
+Loading bio3d and reading in 1hsg file
+```{r}
+library(bio3d)
+file.name<-get.pdb("1hsg.pdb")
+```
+
