@@ -24,13 +24,13 @@ This is my class work for Intro to Bioinformatics (Bimm 143) at UCSD (https://ph
 
 - Class11: [Structural Bioinformatics (part 1)](
 
-- Class12: [Bioinformatics in drug discovery and design](
+- Class12: [Bioinformatics in drug discovery and design](https://github.com/PhilipDaiLe/bimm143/blob/master/lec12/class12files/class12.md)
 
 - Class13: [Genome informatics and high throughput sequenceing (part 1)]
 
-- Class14: [Transcriptomics and analysis of RNA-Seq data](
+- Class14: [Transcriptomics and analysis of RNA-Seq data](https://github.com/PhilipDaiLe/bimm143/blob/master/lec14/Class14CORRECT/Class14.md)
 
-- Class15: [Genome annotation and the interpretation of gene lists](
+- Class15: [Genome annotation and the interpretation of gene lists](https://github.com/PhilipDaiLe/bimm143/blob/master/lec15/Class15/Class15.md)
 
 - Class16: [Essential UNIX for bioinformatics](
 
