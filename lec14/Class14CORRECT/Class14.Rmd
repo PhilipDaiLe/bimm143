@@ -1,0 +1,199 @@
+---
+title: "Class13(RNA-Seq)"
+author: "Philip Dai Le"
+date: "11/12/2019"
+output: github_document
+---
+
+##Lecture 14 - RNA-seq
+
+Installing key packages needed for RNA-seq analysis
+```{r}
+#install.packages("BiocManager")
+
+#For this class, need DESeq2 as well; BiocManager to ensure the package gets pulled from the BiocManager
+
+#BiocManager::install("DESeq2")
+```
+
+**Hands-on** notes
+*Gene of interest: CRISPLD2 - codes for secreted protein used in lung development
+
+  +Mutation (SNPS) - corticosteroid resistance and bronchodilator response in asthma patients
+  +Data analyzed with Tophat and Cufflinks
+  +CRISPLD2 mRNA expression examined with qPCR
+  
+  
+Importing countData and colData
+```{r}
+#reading in data files, sensitive to file name and location of file
+counts <- read.csv("airway_scaledcounts.csv", stringsAsFactors = FALSE)
+metadata <-  read.csv("airway_metadata.csv", stringsAsFactors = FALSE)
+
+```
+
+Looking into the file
+```{r}
+head(counts)
+```
+
+
+Counting number of genes
+```{r}
+nrow(counts) #38694 genes
+```
+
+Counting number of experiments
+```{r}
+ncol(counts) #9experiments
+```
+
+Looking into the metadata
+```{r}
+View(metadata)
+nrow(metadata) #8 due to the first row being gene name so 8 experiments
+
+
+```
+
+
+
+##Finding the average of the metadata
+Seeing if there's a difference in expression values for control (non-drug) vs treated (drugs added to cell line).
+
+Initial step, to find which experiments were control and get the average values across all control experiments. Following, we'll find which experiments were treated and then find the average of the experimented values.
+```{r}
+control <- metadata[metadata[,"dex"]=="control",]
+control.mean <- rowSums( counts[ ,control$id] )/4 
+names(control.mean) <- counts$ensgene
+
+treat <-metadata[metadata [,"dex"]=="treated",]
+treat.mean <-rowSums (counts [,treat$id])/4
+names(treat.mean)<- counts$ensgene
+
+meancounts <-data.frame(control.mean,treat.mean)
+colSums(meancounts)
+```
+
+How to make this code more robust? adjust "4" in averaging data with control$id to account for varying length/amount of data
+```{r}
+#counts[,control$id] #factors in the number of rows
+
+#controlRE <- metadata[metadata[,"dex"]=="control",]
+#control.meanRE<- rowSums(counts[,controlRE$id])/ length(controlRE$id)
+#names(control.meanRE) <- counts$ensgene
+
+#treatRE <-metadata[metadata[, "dex"]=="treated",]
+#treat.meanRE <- rowSums (counts[, treatRE$id])/ length(treatRE$id)
+#names(treat.meanRE) <- counts$ensgene
+
+#meancountsRE <- data.frame(control.meanRE, treat.meanRE)
+#colSums(meanscountsRE)
+
+
+```
+
+
+Plotting control vs treated
+```{r}
+#plot.default(meanscountsRE)
+#plot(meancountsRE$control.meanRE, meancountsRE$treat.meanRE, log= "xy", xlab= "control", ylab="treated", col="black")
+#?plot.default()
+```
+
+Assessing drug treatmeant effect by comparing data values of treated vs control
+
+```{r}
+#meancountsRE$log2fc <- log2(meancountsRE[,"treat.meanRE"]/meancountsRE[,"control.meanRE"])
+#head(meancountsRE)
+
+#meancountsRE$log2fc is to create an extra column for log
+#0.00 means no data or no expression
+```
+
+
+Determining location of zeroes in a matrix and using the "which" function. The "which" function informs which elements meets a criteria. "arr.ind = TRUE" returns the results of a function in an arrray format that tells the row and col location of desired values.
+```{r}
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+head(zero.vals) #outputs the genes with a zero impact from treatment
+to.rm <- unique(zero.vals[,1])
+mycounts <- meancounts[-to.rm,]
+head(mycounts) #outputs significant genes with an impact from treatment
+```
+
+
+Seeing if genes are up and down regulated. Function did not work
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+
+sum(up.ind)
+
+```
+
+Using DESeq2 Aalysis 
+```{r}
+library (DESeq2)
+citation("DESeq2")
+
+
+```
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+dds
+
+
+dds<-DESeq(dds)
+
+res<- results(dds)
+res
+summary(res)
+```
+
+
+
+Volcano plots, then annotation, and lastly save results
+```{r}
+res$sig <- res$padj<0.05 & abs(res$log2FoldChange)>2
+table(res$sig)
+
+
+##setting in arguments for volcano plot
+palette(c("gray", "blue")) # adjusts the color of the data plots
+plot (res$log2FoldChange, -log(res$padj), col=res$sig+1, ylab="-log(P-value)", xlab= "log2(FoldChange)") # code for the volcano format
+abline(v=c(-2,2), col="darkgray", lty=2) #adds in horizontal cutoff lines
+abline(h=-log(0.1), col="darkgray", lty=2) # adds in vertical cutoff line
+```
+
+Adjusting the volcano plot
+```{r}
+mycols <- rep("gray", nrow(res))
+mycols[abs(res$log2FoldChange)>2] <-"blue"
+mycols[abs(res$padj)>0.5] <- "red"
+plot(res$log2FoldChange, -log(res$padj), col=mycols)
+abline(v=c(-2,2), col="darkgray", lty=2) 
+abline(h=-log(0.1), col="darkgray", lty=2)
+```
+
+
+
+ggplot and volcano plot combined
+```{r}
+library(bio3d)
+
+
+#ggplot2::(as.data.frame(res), aes(log2FoldChange, -log10(pvalue), col=sig)) + 
+#    geom_point() + 
+#    ggtitle("Volcano plot")
+```
+
+
+Writing and saving the current file with results
+```{r}
+#write.csv(res, file="expression_results")
+```
+

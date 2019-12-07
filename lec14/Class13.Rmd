@@ -1,0 +1,33 @@
+---
+title: "Class13(RNA-Seq)"
+author: "Philip Dai Le"
+date: "11/12/2019"
+output: html_document
+---
+
+##Lecture 14 - RNA-seq
+
+Installing key packages needed for RNA-seq analysis
+```{r}
+#install.packages("BiocManager")
+
+#For this class, need DESeq2 as well; BiocManager to ensure the package gets pulled from the BiocManager
+
+#BiocManager::install("DESeq2")
+```
+
+**Hands-on** notes
+*Gene of interest: CRISPLD2 - codes for secreted protein used in lung development
+
+  +Mutation (SNPS) - corticosteroid resistance and bronchodilator response in asthma patients
+  +Data analyzed with Tophat and Cufflinks
+  +CRISPLD2 mRNA expression examined with qPCR
+  
+  
+Importing countData and colData
+```{r}
+#reading in data files
+counts<- read.csv("airway_scaledcounts.csv", stringsAsFactors = FALSE)
+```
+
+
