@@ -4,19 +4,19 @@ This is my class work for Intro to Bioinformatics (Bimm 143) at UCSD (https://ph
 ## Content work
 - Class01: [Welcome to Bioinformatics](
 
-- Class02: [Sequence alignment fundamentals, algorithms and applications](
+- Class02: [Sequence alignment fundamentals, algorithms and applications]
 
-- Class03:  [Advanced sequence alignment and database searching](
+- Class03:  [Advanced sequence alignment and database searching]
 
-- Class04: [Bioinformatics data analysis with R](
+- Class04: [Bioinformatics data analysis with R]
 
 - Class05: [Data exploration and visualization in R](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec5Classwork/Class5R.md)
 
-- Class06: [Why, when and how of writing your own R functions](
+- Class06: [Why, when and how of writing your own R functions](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec6Classwork/class06/Class6.md)
 
-- Class07: [Bioinformatics R packages from CRAN and BioConductor](
+- Class07: [Bioinformatics R packages from CRAN and BioConductor](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec7Classwork/Class7.md)
 
-- Class08: [Introduction to machine learning for Bioinformatics 1](
+- Class08: [Introduction to machine learning for Bioinformatics 1](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec8/Class08/Class08Lecture.md)
 
 - Class09: [Unsupervised learning mini-project](https://github.com/PhilipDaiLe/bimm143/tree/master/Lec9/Class09)
 
