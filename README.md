@@ -32,9 +32,9 @@ This is my class work for Intro to Bioinformatics (Bimm 143) at UCSD (https://ph
 
 - Class15: [Genome annotation and the interpretation of gene lists](https://github.com/PhilipDaiLe/bimm143/blob/master/lec15/Class15/Class15.md)
 
-- Class16: [Essential UNIX for bioinformatics](
+- Class16: [Essential UNIX for bioinformatics]
 
-- Class17: [Biological network analsis](
+- Class17: [Biological network analsis](https://github.com/PhilipDaiLe/bimm143/blob/master/Lec17/Class17/Class17.Rmd)
 
 - Class18: [Cancer genomics](
 
