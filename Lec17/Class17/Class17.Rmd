@@ -1,0 +1,219 @@
+---
+title: "Class17"
+author: "Philip Dai Le"
+date: "11/19/2019"
+output: github_document
+---
+
+##Class 17 - Quiz and Networking
+
+**Quiz review**
+1) Minimum input for a single-layered vector?
+  A numeric vector; ex: plot(c(1:10)); time series numeric data
+  
+2)Data frame "df" with 2 rows and 5 coums, what will df[,1] return?
+  A vector of length 2; 
+  ex: data.frame(1:5, 1:5); two columns at 1-5, is.vector(df[,2]) = TRUE
+    +Flattens columns into vector?
+    +df2<- df[,2,drop = FALSE]; drop = drops extra dimension thus allows column output
+
+3) Correct way to extract vector from row in data frame X. Name of the first row is month
+  X[1,] or X["month",] if don't know position but know name
+  
+4) jal <- function... what data type outputs no error messages?
+  Numerics and T/F logicals cause 1/0
+  
+**Hands-on part 2**
+
+Loading in bioconductor packages: Rcy3, igraph, and RColorBrewer
+```{r}
+library(RCy3) #had to install via BiocManager::install("Ryc3")
+library (igraph)# had to install via install.package("igraph")
+library (RColorBrewer)
+```
+
+Testing to see if Cytoscape connection is present and Rcy3 is installed and which version is installed.
+```{r}
+cytoscapePing()
+cytoscapeVersionInfo()
+```
+
+Testing igraph by creating a small network
+```{r}
+g <- makeSimpleIgraph()
+createNetworkFromIgraph(g, "mygraph") #needs and affect cytoscape
+plot(g)
+```
+
+
+Creating a Cytoscape rendered network image
+```{r}
+fig <-exportImage(filename = "demo", type= "png", height = 350)
+#graph is gray because we adjusted cytoscape's default color to dark gray
+knitr::include_graphics(("./demo.png"))
+```
+
+Switching visuals styles for demo network.
+```{r}
+setVisualStyle(("Marquee"))
+```
+
+Seeing potential visual styles.
+```{r}
+styles <-getVisualStyleNames()
+styles
+```
+
+Reading in species co-occurence matrix data.
+```{r}
+prok_vir_cor <- read.delim("virus_prok_cor_abundant.tsv", stringsAsFactors = FALSE)
+
+head(prok_vir_cor)
+```
+
+Utilizing igraph to output prok_vir_cor data
+```{r}
+prokG<- graph.data.frame(prok_vir_cor, directed = FALSE)
+prokG
+class(prokG)
+plot(prokG) #pre-edit
+plot(prokG, vertex.size=3, vertex.label=NA) # adjusting size to 3 and taking out labels
+```
+
+Trying out ggplot package with prok_vir_cor data. First installed ggraph with Biocmanage::install("ggraph") and loaded with library.
+```{r}
+library(ggraph)
+```
+
+Using ggraph with prokG
+```{r}
+ggraph (prokG, layout = 'auto') + geom_edge_link(alpha=0.25) + geom_node_point(color = "red") + theme_graph()
+```
+
+Outputting Ggraph to Cytoscape
+```{r}
+createNetworkFromIgraph(prokG, "myIgraph")
+```
+
+##Network querys 
+Checking the vertex and edge attributes of prok_vir_cor
+```{r}
+V(prokG) #check the vertices of the prokG
+E(prokG) #check the edge
+```
+
+Using the Girvan & Newman betweenness clustering to visualize connected nodes
+```{r}
+cb <-cluster_edge_betweenness(prokG)
+```
+ 
+```{r}
+cb
+plot(cb, y=prokG, vertex.size = 3, vertex.label = NA)
+```
+
+```{r}
+head(membership(cb))
+```
+
+**Node Degree**
+Calculate and plot the node degree for prokG
+```{r}
+d<-degree(prokG)
+hist(d, breaks = 30, col = "lightblue", main = "Node Degree Distribution")
+```
+
+```{r}
+plot (degree_distribution(prokG), type="h")
+```
+
+**Centrality Analysis**
+Estimating the importance of a node based on its connectivity to its network using centrality analysis.
+```{r}
+pr <- page_rank(prokG)
+head(pr$vector)
+```
+
+Plotting network with nodes and centrality score
+```{r}
+v.size <- BBmisc::normalize(pr$vector, range=c(2,20), method="range")
+plot(prokG, vertex.size=v.size, vertex.label=NA)
+```
+
+```{r}
+v.size <- BBmisc::normalize(d, range=c(2,20), method="range")
+plot(prokG, vertex.size=v.size, vertex.label=NA)
+```
+
+```{r}
+b <- betweenness(prokG)
+v.size <- BBmisc::normalize(b, range=c(2,20), method="range")
+plot(prokG, vertex.size=v.size, vertex.label=NA)
+```
+
+**Read taaxonomic classification for network annotation**
+```{r}
+phage_id_affiliation <- read.delim("phage_ids_with_affiliation.tsv")
+head(phage_id_affiliation)
+```
+
+```{r}
+bac_id_affi<- read.delim("prok_tax_from_silva.tsv", stringsAsFactors = FALSE)
+head(bac_id_affi)
+```
+
+```{r}
+genenet.nodes <- as.data.frame(vertex.attributes(prokG), stringsAsFactors = FALSE)
+head(genenet.nodes)
+```
+
+```{r}
+length(grep("^ph", genenet.nodes[,1]))
+```
+
+```{r}
+z<-bac_id_affi[,c("Accession_ID", "Kingdom", "Phylum", "Class")]
+n<-merge(genenet.nodes, z, by.x="name", by.y = "Accession_ID", all.x = TRUE)
+head(n)
+```
+
+```{r}
+colnames(n)
+```
+
+```{r}
+colnames(phage_id_affiliation)
+```
+
+```{r}
+y<-phage_id_affiliation [,c("first_sheet.Phage_id_network", "phage_affiliation", "Tax_order", "Tax_subfamily")]
+
+x<-merge(x=n, y=y, by.x="name", by.y="first_sheet.Phage_id_network",all.x = TRUE)
+
+x<- x[!duplicated((x$name)),]
+head(x)
+```
+
+```{r}
+genenet.nodes <- x
+```
+
+```{r}
+deleteAllNetworks()
+```
+
+```{r}
+colnames(genenet.nodes)[1] <-"id"
+```
+
+```{r}
+genenet.edges<- data.frame(igraph::as_edgelist(prokG))
+colnames(genenet.edges)<- c("source", "target")
+genenet.edges$Weight <-igraph::edge_attr(prokG)$weight
+createNetworkFromDataFrames(genenet.nodes, genenet.edges, title = "Tara_Oceans")
+```
+
+```{r}
+sessionInfo()
+```
+

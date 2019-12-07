@@ -1,0 +1,32 @@
+---
+title: "Class16"
+author: "Philip Dai Le"
+date: "11/21/2019"
+output: html_document
+---
+Ip Access code = 33
+##Unix and Genome Informatics 1
+*Type in "pwd" - Print Work Directory; gets location of file
+*Type in "ls" - List out files and directories where you at
+*Type in "cd" - change directory
+  +cd Desktop/; results in changing the file location to desktop
+  
+*Type in "mkdir" for "class16"- creates a directory 
+
+*"cd class16/" to change directory to class16
+  +Don't use spaces in a file name and folder due to space separating arguments and files
+  
+*need to consistently "cd" to explore a file
+*use cd../ to exit out of directories
+*use "q" to quit a file
+
+*windows equivalent of "man" is "--help" following a command
+
+*"nano 'filename'" to write a text file with nano
+*use ctrl+command to execute; "ctrl+x to exit
+
+
+
+
+
+
